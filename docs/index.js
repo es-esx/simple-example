@@ -8,8 +8,20 @@ var _root,
   _create_root2 = () => {
     _create_root2 = null;
     var dyn0;
+    return _root2 = new ESXElement([dyn0 = ESXSlot.createTag()], [], [dyn0]);
+  },
+  _root3,
+  _create_root3 = () => {
+    _create_root3 = null;
+    var dyn0;
+    return _root3 = new ESXElement([dyn0 = ESXSlot.createTag()], [], [dyn0]);
+  },
+  _root4,
+  _create_root4 = () => {
+    _create_root4 = null;
+    var dyn0;
     var dyn1;
-    return _root2 = new ESXElement([ESXSlot.createTag("button"), dyn0 = new ESXSlot("onClick")], [dyn1 = new ESXSlot(null)], [dyn0, dyn1]);
+    return _root4 = new ESXElement([ESXSlot.createTag("button"), dyn0 = new ESXSlot("onClick")], [dyn1 = new ESXSlot(null)], [dyn0, dyn1]);
   },
   _esx,
   _create_esx = () => {
@@ -23,6 +35,7 @@ const transform = esx => {
   if (typeof tag === 'function') {
     let node, prevRoot;
     hooked(() => {
+      console.time('update');
       const newNodeEsx = tag();
       if (newNodeEsx.root !== prevRoot) {
         prevRoot = newNodeEsx.root;
@@ -33,6 +46,7 @@ const transform = esx => {
         }
       }
       node.update(newNodeEsx);
+      console.timeEnd('update');
     })();
     return node;
   } else {
@@ -44,14 +58,26 @@ const transform = esx => {
           slots
         }
       } = nodeEsx;
-      node.onclick = slots[1] && nodeEsx.getSlotValue(slots[1]);
       node.textContent = nodeEsx.getSlotValue(children[0]);
+      if (slots.length > 1) node.onclick = nodeEsx.getSlotValue(slots[1]);
     };
     return node;
   }
 };
-document.body.appendChild(transform(new ESX(_root || _create_root(), [Counter])));
+const same = () => transform(new ESX(_root || _create_root(), [Counter]));
+console.time('render');
+document.body.append(transform(new ESX(_root2 || _create_root2(), [Counter])), same(), same(), same(), transform(new ESX(_root3 || _create_root3(), [Counter])));
+console.timeEnd('render');
+if (location.search === '?auto') {
+  requestAnimationFrame(function click() {
+    const button = document.querySelector('button');
+    if (button) {
+      button.click();
+      requestAnimationFrame(click);
+    }
+  });
+}
 function Counter() {
   const [count, update] = useState(0);
-  return count < 10 ? new ESX(_root2 || _create_root2(), [() => update(count + 1), count]) : _esx || _create_esx();
+  return count < 10 ? new ESX(_root4 || _create_root4(), [() => update(count + 1), count]) : _esx || _create_esx();
 }

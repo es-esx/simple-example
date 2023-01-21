@@ -5,6 +5,7 @@ const transform = esx => {
     if (typeof tag === 'function') {
         let node, prevRoot
         hooked(() => {
+            console.time('update')
             const newNodeEsx = tag()
             if (newNodeEsx.root !== prevRoot) {
                 prevRoot = newNodeEsx.root
@@ -17,22 +18,42 @@ const transform = esx => {
                 }
             }
             node.update(newNodeEsx)
+            console.timeEnd('update')
         })()
         return node
     } else {
         const node = document.createElement(tag)
         node.update = (nodeEsx) => {
             const {root: {children, slots}} = nodeEsx
-            node.onclick = slots[1] && nodeEsx.getSlotValue(slots[1])
             node.textContent = nodeEsx.getSlotValue(children[0])
+            if (slots.length > 1)
+                node.onclick = nodeEsx.getSlotValue(slots[1])
         }
         return node
     }
 }
 
-document.body.appendChild(
-    transform(<Counter/>)
+const same = () => transform(<Counter />)
+
+console.time('render')
+document.body.append(
+    transform(<Counter />),
+    same(),
+    same(),
+    same(),
+    transform(<Counter />)
 )
+console.timeEnd('render')
+
+if (location.search === '?auto') {
+    requestAnimationFrame(function click() {
+        const button = document.querySelector('button')
+        if (button) {
+            button.click()
+            requestAnimationFrame(click)
+        }
+    })
+}
 
 function Counter() {
     const [count, update] = useState(0)
